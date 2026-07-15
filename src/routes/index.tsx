@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import musicAsset from "@/assets/birthday-music.mp3.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "كل عام وأنتِ بخير يا آيات 🎂" },
+      { title: "AYAT SAMY🎂" },
       { name: "description", content: "بطاقة تهنئة فاخرة بعيد ميلاد آيات — من صديقك محمد" },
       { property: "og:title", content: "كل عام وأنتِ بخير يا آيات" },
       { property: "og:description", content: "احتفال خاص بعيد ميلاد آيات" },
-      { property: "og:image", content: "logo A" },
-      { property: "twitter:image", content: "logo A" },
+      { property: "og:image", content: "🎂" },
+      { property: "twitter:image", content: "🎂" },
       { property: "og:type", content: "website" },
     ],
     links: [
@@ -235,6 +235,66 @@ function useCountdown() {
 }
 
 /* ---------- Main page ---------- */
+function MusicPlayer() {
+  const [enabled, setEnabled] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const src = "/src/assets/Albumaty.Com_mhmwd_alasyly_kl_snt_-_ealan_wady_dglt_llttwyr_alakary.mp3.mpeg";
+
+  useEffect(() => {
+    // Create/attach audio once and keep it ready.
+    if (!audioRef.current) {
+      const a = new Audio(src);
+      a.loop = true;
+      a.preload = "auto";
+      audioRef.current = a;
+    }
+
+    const a = audioRef.current;
+    if (!a) return;
+
+    const tryPlay = async () => {
+      if (!enabled) return;
+      try {
+        // Must be triggered from user gesture in many browsers; this component is mounted
+        // after the gift click, but we also catch autoplay blocks.
+        await a.play();
+      } catch {
+        // Ignore autoplay restrictions.
+      }
+    };
+
+    tryPlay();
+  }, [enabled]);
+
+  const toggle = async () => {
+    setEnabled((v) => !v);
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) {
+      try {
+        await a.play();
+      } catch {
+        // ignore
+      }
+    } else {
+      a.pause();
+    }
+  };
+
+  return (
+    <div className="fixed left-4 top-4 z-[70]">
+      <button
+        onClick={toggle}
+        className="glass rounded-full px-4 py-2 text-sm font-semibold text-foreground/90 backdrop-blur transition hover:scale-[1.02]"
+        aria-label={enabled ? "إيقاف الموسيقى" : "تشغيل الموسيقى"}
+      >
+        {enabled ? "🔊 الموسيقى" : "🔇 كتم"}
+      </button>
+    </div>
+  );
+}
+
+/* ---------- Main page ---------- */
 function BirthdayPage() {
   const [opened, setOpened] = useState(false);
   const [openingGift, setOpeningGift] = useState(false);
@@ -242,11 +302,11 @@ function BirthdayPage() {
   const [showLetter, setShowLetter] = useState(false);
   const [showFinalGift, setShowFinalGift] = useState(false);
   const [candlesOut, setCandlesOut] = useState<boolean[]>([false, false, false, false, false]);
-  const [muted, setMuted] = useState(false);
+
   const [particles, setParticles] = useState<Particle[]>([]);
   const [fireworks, setFireworks] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
   const [showGreeting, setShowGreeting] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const sfx = useSfx();
   const cd = useCountdown();
 
@@ -292,12 +352,8 @@ function BirthdayPage() {
     }, 900);
   };
 
-  const startMusic = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.volume = 0.5;
-    a.play().catch(() => {});
-  };
+
+
 
   const blowCandle = (i: number, e: React.MouseEvent) => {
     if (candlesOut[i]) return;
@@ -307,7 +363,7 @@ function BirthdayPage() {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
     emit(r.left + r.width / 2, r.top, 8, "heart");
     if (next.every(Boolean)) {
-      startMusic();
+
       launchFireworks();
       setShowGreeting(true);
       setTimeout(() => setShowGreeting(false), 3800);
@@ -319,13 +375,8 @@ function BirthdayPage() {
     emit(x, y, 12, Math.random() > 0.5 ? "heart" : "star");
   };
 
-  const toggleMute = () => {
-    if (!audioRef.current) return;
-    const next = !muted;
-    audioRef.current.muted = next;
-    if (!next && audioRef.current.paused) audioRef.current.play().catch(() => {});
-    setMuted(next);
-  };
+
+
 
   const celebrateAgain = () => {
     setCandlesOut([false, false, false, false, false]);
@@ -340,7 +391,8 @@ function BirthdayPage() {
 
   return (
     <main className="relative min-h-screen overflow-x-hidden" dir="rtl">
-      <audio ref={audioRef} src={musicAsset.url} loop preload="none" />
+
+
       <Stars />
       {opened && <FloatingBalloons onPop={popBalloon} />}
       <ParticleLayer items={particles} />
@@ -382,17 +434,10 @@ function BirthdayPage() {
 
 
       {/* Music toggle */}
-      {opened && (
-        <button
-          onClick={toggleMute}
-          className="glass fixed top-4 left-4 z-50 flex h-12 w-12 items-center justify-center rounded-full text-xl transition-transform hover:scale-110"
-          aria-label={muted ? "تشغيل الموسيقى" : "إيقاف الموسيقى"}
-        >
-          {muted ? "🔇" : "🎵"}
-        </button>
-      )}
+      <MusicPlayer />
 
       {/* ============ GIFT SCREEN ============ */}
+
       {!opened && (
         <section className="relative z-20 flex min-h-screen flex-col items-center justify-center px-4">
           <p className="glass mb-8 rounded-full px-6 py-2 text-sm text-foreground/80">
@@ -673,8 +718,7 @@ function BirthdayPage() {
           </div>
 
           <footer className="mt-14 space-y-2 text-center text-sm text-foreground/60">
-            <p>مع كل الحب — صديقك محمد ❤</p>
-            <p className="text-xs text-foreground/40">Made with ❤ by Mohamed Emad</p>
+            <p>مع كل الحب صديقك محمد</p>
           </footer>
         </div>
       )}

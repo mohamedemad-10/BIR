@@ -235,6 +235,8 @@ function useCountdown() {
 }
 
 /* ---------- Main page ---------- */
+// Full code of music (it’s the MusicPlayer component in src/routes/index.tsx)
+
 function MusicPlayer() {
   const [enabled, setEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
